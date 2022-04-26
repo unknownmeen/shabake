@@ -2,7 +2,7 @@ import PySimpleGUI as psg
 # import ScrapEmallsSite as ses
 from ScrapEmallsSite import ScrapEmallsSite
 from PlotPrice import PlotPrice
-from PlotDraw import PlotDraw
+from PlotDraw import draw_figure
 import os
 #import win32com.client as win32
 
@@ -35,19 +35,22 @@ def make_and_get_layout(plot_price):
     _, _, figure_w, figure_h = plot_price.get_plot().bbox.bounds
 
     plot_layout = [[psg.Text('مقايسه قيمت', font='Any 18')],
-               [psg.Canvas(size=(figure_w, figure_h), key='-CANVAS-')]]
+               [psg.Canvas(size=(100, 30), key='-CANVAS-')]]
 
-    theme_layout = [[psg.Text("See how elements look under different themes by choosing a different theme here!")],
-               [psg.Listbox(values=psg.theme_list(), size=(20, 12), key="THEME LISTBOX", select_mode=True)],
-               [psg.Button('Set Theme', key="changetheme")]]
+    ##theme_layout = [[psg.Text("See how elements look under different themes by choosing a different theme here!")],
+             #  [psg.Listbox(values=psg.theme_list(), size=(20, 12), key="THEME LISTBOX", select_mode=True)],
+             #  [psg.Button('Set Theme', key="changetheme")]]
 
     tabgrp_layout = [
         [psg.TabGroup([
             [psg.Tab('دريافت قيمت', main_layout, tooltip='دريافت قيمت', element_justification='center'),
-             psg.Tab('نمودار قيمت', plot_layout),
-             psg.Tab('تعويض تم', theme_layout, tooltip='nothing')]], tab_location='centertop', key="tab", title_color='Red',
-            tab_background_color='Orange', selected_title_color='black', selected_background_color='White',
-            border_width=5)]]
+             psg.Tab('نمودار قيمت', plot_layout)
+             #psg.Tab('تعويض تم', theme_layout, tooltip='nothing')
+             ]]
+            #, tab_location='centertop', key="tab", title_color='Red',
+            #tab_background_color='Orange', selected_title_color='black', selected_background_color='White',
+            #border_width=5
+        )]]
     return tabgrp_layout
 
 # def excel_export_layput(win32):
@@ -65,6 +68,9 @@ def make_and_get_layout(plot_price):
 
 #window information
 #############################################################
+plot_price = PlotPrice()
+window = psg.Window('parin_group', make_and_get_layout(plot_price), resizable=True, force_toplevel=True, finalize=True)
+fig_photo = draw_figure(window['-CANVAS-'].TKCanvas, plot_price)
 while True:
     event, values = window.read()
 

@@ -41,11 +41,8 @@ class ScrapEmallsSite:
         self.set_price_list(soup)
         self.set_item_list(soup)
 
-        for price in self.get_price_list():
-            window["output"].print([str(price)])
-
-        for item in self.get_item_list():
-            window["output"].print([str(item)])
+        for (item, price) in zip(self.get_item_list(), self.get_price_list()):
+            window["output"].print([str(item), str(price)])
 
         window["url"].update(value=url)
         print([str(self.ui_information_dict)])

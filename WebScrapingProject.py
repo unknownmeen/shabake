@@ -6,7 +6,7 @@ from PlotDraw import draw_figure
 import os
 #import win32com.client as win32
 
-psg.theme("THEME LISTBOX")
+psg.theme("teal mono")
 import matplotlib
 matplotlib.use('TkAgg')
 
@@ -20,9 +20,9 @@ def make_and_get_layout(plot_price):
     main_layout = [
         [psg.Input(key="url", readonly=True),
          psg.Text('لینک خود را وارد کنید', font=('Lucida', 12))],
-        [psg.Input(key="page_number", size=(10, 5)),
+        [psg.Input(key="page_number", size=(10, 5),default_text=1),
          psg.Text('صفحه مورد نظر خود را انتخاب کنید', font=('Lucida', 12)),
-         psg.Combo(['apple', 'samsung', 'xiaomi'], enable_events=True, key="company"),
+         psg.Combo(['apple', 'samsung', 'xiaomi'], enable_events=True, key="company",default_value="apple"),
          psg.Text('برند خود را انتخاب کنید', size=(20, 1), font='Lucida')],
         [psg.Multiline(key="output", disabled=True, size=(45, 20), expand_x=True, expand_y=True, k='-MLINE-',
                        justification='right')],
@@ -35,12 +35,24 @@ def make_and_get_layout(plot_price):
     _, _, figure_w, figure_h = plot_price.get_plot().bbox.bounds
 
     plot_layout = [[psg.Text('مقايسه قيمت', font='Any 18')],
-               [psg.Canvas(size=(100, 30), key='-CANVAS-')]]
+                  [psg.Canvas(size=(100, 30), key='-CANVAS-')],
+                  [psg.Button('< صفحه قبلی', key="Previous_page", font='Any 10'),
+                   psg.Button('صفحه بعدی>', key="Next_page", font='Any 10')]
+                   ]
 
     ##theme_layout = [[psg.Text("See how elements look under different themes by choosing a different theme here!")],
              #  [psg.Listbox(values=psg.theme_list(), size=(20, 12), key="THEME LISTBOX", select_mode=True)],
              #  [psg.Button('Set Theme', key="changetheme")]]
-
+    # Data_layout = [[psg.Button( 'دانلود خروجی'),
+    #                 [[psg.InputText(visible=False, enable_events=True, key='fig_path'),
+    #                 psg.FileSaveAs(
+    #                         key='fig_save',
+    #                         file_types=(('csv')  # TODO: better names
+    #                     )
+    #                 ]]
+    #                 window= psg.Window('Demo Application', layout, finalize=True)
+    # fig_canvas_agg = None
+    # ]]
     tabgrp_layout = [
         [psg.TabGroup([
             [psg.Tab('دريافت قيمت', main_layout, tooltip='دريافت قيمت', element_justification='center'),
@@ -67,6 +79,7 @@ def make_and_get_layout(plot_price):
 #     ws_sheet1.Cells(1, "A").Value = [str(item)]
 
 #window information
+
 #############################################################
 plot_price = PlotPrice()
 window = psg.Window('parin_group', make_and_get_layout(plot_price), resizable=True, force_toplevel=True, finalize=True)
@@ -83,12 +96,39 @@ while True:
     if event == "submit":
         scrap_emalls_site = ScrapEmallsSite(values)
         scrap_emalls_site.scrap_page(window)
-        plot_price.draw_price_list_plot(scrap_emalls_site.get_price_list(),
-                                        scrap_emalls_site.get_item_list())
+        plot_price.set_price_list(scrap_emalls_site.get_price_list())
+        plot_price.set_item_list(scrap_emalls_site.get_item_list())
+        # plot_price.draw_plot()
+        plot_price.draw_price_list_plot()
 
+    if event =="Next_page":
+        plot_price.next()
+        plot_price.draw_price_list_plot()
 
-    if event == "changetheme":
-        psg.theme("THEME LISTBOX")
+    if event =="Previous_page":
+        plot_price.prev()
+        plot_price.draw_price_list_plot()
+    # if event == "دانلود خروجی":
+    #     text = ""
+    #     # for i in range(0, scrap_emalls_site.item_list.len()):
+    #     #     text += scrap_emalls_site.item_list[i]
+    #     #     text += ","
+    #     #     text += scrap_emalls_site.price_list[i]
+    #     #     text += "\n"
+    #     #     break
+    if event == psg.WIN_CLOSED:
+        break
+        ##### for new version
+   # if event in (None, 'Exit'):
+       # print("[LOG] Clicked Exit!")
+       # break
+   # elif event == 'About':
+      #  print("[LOG] Clicked About!")
+       # sg.popup('PySimpleGUI Demo All Elements',
+                # 'Right click anywhere to see right click menu',
+              #   'Visit each of the tabs to see available elements',
+                # 'Output of event and values can be see in Output tab',
+               #  'The event and values dictionary is printed after every event', keep_on_top=True)
 
 window.read()
 window.close()
